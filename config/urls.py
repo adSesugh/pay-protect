@@ -10,6 +10,6 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    re_path(r'^api/', include('djoser.urls'), name='djoser'),
+    re_path(r'^api/', include('djoser.urls')),
     re_path(r'^api/', include('core.urls'), name='core'),
 ]
