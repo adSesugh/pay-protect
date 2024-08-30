@@ -8,3 +8,4 @@ drf-spectacular-sidecar==2024.7.1
 python-dotenv~=1.0.1
 django-cors-headers==4.4.0
 djoser~=2.2.3
+mysqlclient==2.2.4
