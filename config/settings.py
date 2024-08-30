@@ -184,7 +184,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': os.getenv('GATEWAY_SIGNING_KEY'),
     'VERIFYING_KEY': None,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -210,11 +209,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 DJOSER = {
-    #"LOGIN_FIELD": True,
     "USER_CREATE_PASSWORD_RETYPE": True,
     "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
-    "SEND_CONFIRMATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": False,
     "SET_USERNAME_RETYPE": True,
     "SET_PASSWORD_RETYPE": True,
     "LOGOUT_ON_PASSWORD_CHANGE": True,
@@ -231,8 +229,5 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create_password_retype': 'core.serializers.CustomUserCreatePasswordRetypeSerializer',
         'user': 'core.serializers.CustomUserSerializer',
-    },
-    'EMAIL': {
-        'activation': 'core.emails.CustomActivationEmailBackend',
-    },
+    }
 }
