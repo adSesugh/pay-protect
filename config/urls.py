@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -11,5 +13,8 @@ urlpatterns = [
 
 urlpatterns += [
     re_path(r'^api/', include('djoser.urls')),
+    re_path(r'^api/auth/', include('djoser.social.urls')),
     re_path(r'^api/', include('core.urls'), name='core'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
