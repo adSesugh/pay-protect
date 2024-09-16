@@ -56,6 +56,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name',]
+
+
 class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bank
@@ -101,6 +107,8 @@ class ProductSerializer(serializers.ModelSerializer):
         write_only=True
     )
     images = serializers.SerializerMethodField(read_only=True)
+    user = UserDataSerializer(read_only=True)
+    receiver = UserDataSerializer(read_only=True)
 
     class Meta:
         model = Product
@@ -151,6 +159,7 @@ class DisputeSerializer(serializers.ModelSerializer):
     )
     dispute_photos = serializers.SerializerMethodField(read_only=True)
     product = serializers.SerializerMethodField(read_only=True)
+    user = UserDataSerializer(read_only=True)
 
     class Meta:
         model = Dispute
