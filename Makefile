@@ -1,8 +1,11 @@
 generate:
-    python manage.py makemigrations
+	@echo "Making migrations"
+	python manage.py, makemigrations
 
 migrate:
-    python manage.py migrate
+	@echo "Committing migrations to database"
+	python manage.py migrate
 
 runserver:
-    python manage.py runserver
+	@echo "Run web server"
+	python manage.py runserver
