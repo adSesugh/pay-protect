@@ -1,17 +1,20 @@
 from django.contrib import admin
 
 from core.models import Bank, PayoutAccount, Product, ProductImage, ContractQuestion, Agreement, DisputeReason, Dispute, \
-    DisputeImage, ProtectionFee, User
+    DisputeImage, ProtectionFee, User, FAQs
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'date_joined', 'last_login')
+    list_display = ('username', 'email', 'is_staff', 'is_active', 'date_joined', 'last_login', 'referral')
+    list_filter = ('is_staff', 'is_active', 'date_joined', 'last_login', 'referral')
 
 
 @admin.register(Bank)
 class BankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'created_at')
+    list_filter = ('name',)
+
 
 @admin.register(PayoutAccount)
 class PayoutAccountAdmin(admin.ModelAdmin):
@@ -57,3 +60,8 @@ class DisputeImageAdmin(admin.ModelAdmin):
 @admin.register(ProtectionFee)
 class ProtectionFeeAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'name', 'fee', 'is_percent', 'created_at')
+
+
+@admin.register(FAQs)
+class FAQsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'question', 'answer', 'created_at')

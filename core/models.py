@@ -7,6 +7,7 @@ from core.utils import CustomUserManager
 class User(AbstractUser):
     terms = models.BooleanField(default=True)
     referral_code = models.CharField(max_length=100, blank=True)
+    referral = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
