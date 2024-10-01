@@ -36,7 +36,6 @@ class ContractQuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'question', 'additions', 'created_at')
 
 
-
 @admin.register(Agreement)
 class AgreementAdmin(admin.ModelAdmin):
     list_display = ('id', 'receiver', 'product', 'question', 'answer', 'created_at')

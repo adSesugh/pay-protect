@@ -8,6 +8,9 @@ class User(AbstractUser):
     terms = models.BooleanField(default=True)
     referral_code = models.CharField(max_length=100, blank=True)
     referral = models.CharField(max_length=100, blank=True)
+    notify_on_request = models.BooleanField(default=False)
+    notify_on_payment = models.BooleanField(default=False)
+    notify_on_milestone = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
