@@ -9,12 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from core.models import Bank, PayoutAccount, Product, ContractQuestion, Dispute, DisputeReason, ProtectionFee
+from core.models import Bank, PayoutAccount, Product, ContractQuestion, Dispute, DisputeReason, ProtectionFee, FAQs
 from core.serializers import (
     CountrySerializer,
     BankSerializer,
     PayoutAccountSerializer, CustomTokenObtainPairSerializer, ProductSerializer, ContractQuestionSerializer,
-    DisputeSerializer, DisputeReasonSerializer, ProtectionFeeSerializer, AgreementSerializer, ProductReviewSerializer
+    DisputeSerializer, DisputeReasonSerializer, ProtectionFeeSerializer, AgreementSerializer, ProductReviewSerializer,
+    FAQsSerializer
 )
 
 import logging
@@ -52,6 +53,7 @@ class BankViewSet(viewsets.ModelViewSet):
     serializer_class = BankSerializer
     queryset = Bank.objects.all()
     permission_classes = [IsAuthenticated]
+    http_methods_names = ['get', 'post', 'put']
 
 
 class PayoutAccountViewSet(viewsets.ModelViewSet):
@@ -166,4 +168,10 @@ class DisputeViewSet(viewsets.ModelViewSet):
 class ProtectionFeeViewSet(viewsets.ModelViewSet):
     serializer_class = ProtectionFeeSerializer
     queryset = ProtectionFee.objects.all()
+    http_method_names = ['get', 'post', 'put']
+
+
+class FAQsViewSet(viewsets.ModelViewSet):
+    serializer_class = FAQsSerializer
+    queryset = FAQs.objects.all()
     http_method_names = ['get', 'post', 'put']

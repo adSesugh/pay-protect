@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from core import views
 from core.views import CountryListView, BankViewSet, PayoutAccountViewSet, CustomTokenObtainPairView, ProductViewSet, \
-    ContractViewSet, DisputeViewSet, ProtectionFeeViewSet
+    ContractViewSet, DisputeViewSet, ProtectionFeeViewSet, FAQsViewSet
 
 router = routers.DefaultRouter()
 router.register(r'banks', BankViewSet, basename='banks')
@@ -13,6 +13,7 @@ router.register(r'products', ProductViewSet, basename='products')
 router.register(r'questions', ContractViewSet, basename='questions')
 router.register(r'disputes', DisputeViewSet, basename='disputes')
 router.register(r'protection-fees', ProtectionFeeViewSet, basename='protection-fees')
+router.register(r'faqs', FAQsViewSet, basename='faqs')
 
 urlpatterns = [
     re_path('auth/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -6,7 +6,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from core.models import User, Bank, PayoutAccount, Product, ProductImage, ContractQuestion, DisputeReason, Dispute, \
-    ProtectionFee, Agreement, DisputeImage
+    ProtectionFee, Agreement, DisputeImage, FAQs
+from core.utils import generate_random_string
 
 
 class CountrySerializer(serializers.Serializer):
@@ -31,13 +32,15 @@ class CustomUserCreatePasswordRetypeSerializer(UserCreatePasswordRetypeSerialize
             'password': {'write_only': True},
         }
 
-    # def create(self, validated_data):
-    #     group, created = Group.objects.get_or_create(name='Seller')
-    #
-    #     user = super().create(validated_data)
-    #     user.groups.add(group)
-    #
-    #     return user
+    def create(self, validated_data):
+        # group, created = Group.objects.get_or_create(name='Seller')
+        referral_code = generate_random_string()
+        user = super().create(validated_data)
+        user.referral_code = referral_code
+        user.save()
+        # user.groups.add(group)
+
+        return user
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -59,7 +62,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name',]
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', ]
 
 
 class BankSerializer(serializers.ModelSerializer):
@@ -249,3 +252,14 @@ class DisputeImageSerializer(serializers.ModelSerializer):
         if obj.photo:
             return request.build_absolute_uri(obj.photo.url) if request else settings.DEFAULT_HOST + obj.photo.url
         return None
+
+
+class FAQsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQs
+        fields = '__all__'
+        read_only_fields = ('user',)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        return FAQs.objects.create(**validated_data, user=user)

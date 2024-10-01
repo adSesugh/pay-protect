@@ -13,7 +13,7 @@ urlpatterns = [
 
 urlpatterns += [
     re_path(r'^api/', include('djoser.urls')),
-    re_path(r'^api/auth/', include('djoser.social.urls')),
+    re_path(r'^api/social-auth/', include('djoser.social.urls')),
     re_path(r'^api/', include('core.urls'), name='core'),
 ]
 

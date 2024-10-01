@@ -6,6 +6,7 @@ from core.utils import CustomUserManager
 
 class User(AbstractUser):
     terms = models.BooleanField(default=True)
+    referral_code = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -133,3 +134,10 @@ class ProtectionFee(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FAQs(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    question = models.TextField()
+    answer = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
