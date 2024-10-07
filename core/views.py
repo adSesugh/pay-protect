@@ -7,7 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
 from core.models import Bank, PayoutAccount, Product, ContractQuestion, Dispute, DisputeReason, ProtectionFee, FAQs
 from core.serializers import (
@@ -15,7 +15,7 @@ from core.serializers import (
     BankSerializer,
     PayoutAccountSerializer, CustomTokenObtainPairSerializer, ProductSerializer, ContractQuestionSerializer,
     DisputeSerializer, DisputeReasonSerializer, ProtectionFeeSerializer, AgreementSerializer, ProductReviewSerializer,
-    FAQsSerializer
+    FAQsSerializer, CustomTokenVerifySerializer, CustomTokenRefreshSerializer
 )
 
 import logging
@@ -35,6 +35,14 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             UserModel.objects.filter(pk=user.pk).update(last_login=now())
             logger.info(f"Updated last_login for User ID: {user.pk}")
         return response
+
+
+class CustomTokenVerifyView(TokenVerifyView):
+    serializer_class = CustomTokenVerifySerializer
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
 
 
 class CountryListView(APIView):

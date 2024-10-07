@@ -12,9 +12,8 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    re_path(r'^api/', include('djoser.urls')),
-    re_path(r'^api/social-auth/', include('djoser.social.urls')),
     re_path(r'^api/', include('core.urls'), name='core'),
+    re_path(r'^api/auth/social/', include('drf_social_oauth2.urls', namespace='drf'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

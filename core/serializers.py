@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
-from djoser.serializers import UserCreatePasswordRetypeSerializer, UserCreateSerializer
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer, \
+    TokenVerifySerializer
+from rest_framework_simplejwt.tokens import UntypedToken, RefreshToken
 
 from core.models import User, Bank, PayoutAccount, Product, ProductImage, ContractQuestion, DisputeReason, Dispute, \
     ProtectionFee, Agreement, DisputeImage, FAQs
@@ -15,39 +17,10 @@ class CountrySerializer(serializers.Serializer):
     label = serializers.CharField()
 
 
-class CustomUserSerializer(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
-        model = User
-        fields = '__all__'
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
-
-
-class CustomUserCreatePasswordRetypeSerializer(UserCreatePasswordRetypeSerializer):
-    class Meta(UserCreatePasswordRetypeSerializer.Meta):
-        fields = [*UserCreatePasswordRetypeSerializer.Meta.fields]
-        model = User
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
-
-    def create(self, validated_data):
-        # group, created = Group.objects.get_or_create(name='Seller')
-        referral_code = generate_random_string()
-        user = super().create(validated_data)
-        user.referral_code = referral_code
-        user.save()
-        # user.groups.add(group)
-
-        return user
-
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # Add custom claims here if needed
         return token
 
     def validate(self, attrs):
@@ -56,6 +29,29 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user:
             UserModel = get_user_model()
             UserModel.objects.filter(pk=user.pk).update(last_login=now())
+        return data
+
+
+class CustomTokenVerifySerializer(TokenVerifySerializer):
+    def validate(self, attrs):
+        token = attrs['token']
+        try:
+            # Check if the token is valid
+            UntypedToken(token)
+        except (TokenError, InvalidToken) as e:
+            raise serializers.ValidationError("Token is invalid or expired")
+
+        # Add custom validation or logic here, if needed
+        return attrs
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        refresh = RefreshToken(attrs['refresh'])
+        data = {'access': str(refresh.access_token)}
+
+        # Custom logic here (e.g., logging)
+
         return data
 
 
@@ -96,7 +92,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image']
 
-    def get_image(self, obj):
+    def get_image(self, obj) -> str:
         request = self.context.get('request')
         if obj.image:
             return request.build_absolute_uri(obj.image.url) if request else settings.DEFAULT_HOST + obj.image.url
@@ -118,7 +114,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'amount', 'fee', 'photo', 'images', 'user', 'receiver']
         read_only_fields = ['id', 'user', 'receiver']
 
-    def get_images(self, obj):
+    def get_images(self, obj) -> list:
         photos = ProductImage.objects.filter(product=obj)
         serializer = ProductImageSerializer(photos, many=True)
         return serializer.data
@@ -169,12 +165,12 @@ class DisputeSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'product', 'reason', 'description', 'image', 'user', 'dispute_photos']
         depth = 1
 
-    def get_dispute_photos(self, obj):
+    def get_dispute_photos(self, obj) -> list:
         photos = DisputeImage.objects.filter(dispute=obj)
         serializer = DisputeImageSerializer(photos, many=True)
         return serializer.data
 
-    def get_product(self, obj):
+    def get_product(self, obj) -> dict:
         product = Product.objects.filter(id=obj.product.id).first()
         serializer = ProductSerializer(product)
         return serializer.data
@@ -225,16 +221,16 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'user', 'created_at', 'updated_at',)
         depth = 1
 
-    def get_photos(self, obj):
+    def get_photos(self, obj) -> list:
         photo = ProductImage.objects.filter(product=obj)
         return ProductImageSerializer(photo, many=True).data
 
-    def get_questions(self, obj):
+    def get_questions(self, obj) -> list:
         questions = ContractQuestion.objects.all()
         serializer = ContractQuestionSerializer(questions, many=True)
         return serializer.data
 
-    def get_agreement(self, obj):
+    def get_agreement(self, obj) -> list:
         agreement = Agreement.objects.filter(product=obj)
         serializer = AgreementSerializer(agreement, many=True)
         return serializer.data
@@ -247,7 +243,7 @@ class DisputeImageSerializer(serializers.ModelSerializer):
         model = DisputeImage
         fields = '__all__'
 
-    def get_photo(self, obj):
+    def get_photo(self, obj) -> str:
         request = self.context.get('request')
         if obj.photo:
             return request.build_absolute_uri(obj.photo.url) if request else settings.DEFAULT_HOST + obj.photo.url

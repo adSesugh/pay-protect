@@ -1,10 +1,8 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from rest_framework import routers
-from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
-from core import views
 from core.views import CountryListView, BankViewSet, PayoutAccountViewSet, CustomTokenObtainPairView, ProductViewSet, \
-    ContractViewSet, DisputeViewSet, ProtectionFeeViewSet, FAQsViewSet
+    ContractViewSet, DisputeViewSet, ProtectionFeeViewSet, FAQsViewSet, CustomTokenVerifyView, CustomTokenRefreshView
 
 router = routers.DefaultRouter()
 router.register(r'banks', BankViewSet, basename='banks')
@@ -16,9 +14,9 @@ router.register(r'protection-fees', ProtectionFeeViewSet, basename='protection-f
 router.register(r'faqs', FAQsViewSet, basename='faqs')
 
 urlpatterns = [
-    re_path('auth/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    re_path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    re_path('auth/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('auth/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/token/verify/', CustomTokenVerifyView.as_view(), name='token_verify'),
     re_path('countries/', CountryListView.as_view(), name='country_list'),
 ]
 
