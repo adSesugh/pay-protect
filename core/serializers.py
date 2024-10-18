@@ -150,6 +150,10 @@ class DisputeReasonSerializer(serializers.ModelSerializer):
         read_only_fields = ('user',)
 
 
+class DisputeStatusSerializer(serializers.Serializer):
+    status = serializers.CharField()
+
+
 class DisputeSerializer(serializers.ModelSerializer):
     image = serializers.ListField(
         child=serializers.ImageField(),
@@ -162,7 +166,7 @@ class DisputeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dispute
-        fields = ['id', 'user', 'product', 'reason', 'description', 'image', 'user', 'dispute_photos']
+        fields = ['id', 'user', 'product', 'reason', 'description', 'image', 'user', 'dispute_photos', 'status']
         depth = 1
 
     def get_dispute_photos(self, obj) -> list:

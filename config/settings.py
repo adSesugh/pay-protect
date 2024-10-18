@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'social_django',
     'drf_social_oauth2',
     'django_countries',
+    'django_filters',
 
     # App
     'core',

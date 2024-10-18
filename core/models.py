@@ -11,6 +11,7 @@ class User(AbstractUser):
     notify_on_request = models.BooleanField(default=False)
     notify_on_payment = models.BooleanField(default=False)
     notify_on_milestone = models.BooleanField(default=False)
+    photo_url = models.ImageField(upload_to='photos/%Y/%m/%d/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -107,10 +108,15 @@ class DisputeReason(models.Model):
 
 
 class Dispute(models.Model):
+    DISPUTE_CHOICES = [
+        ('PENDING', 'PENDING'),
+        ('TREATED', 'TREATED'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     reason = models.ForeignKey(DisputeReason, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
+    status = models.CharField(choices=DISPUTE_CHOICES, default='PENDING', max_length=50)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 

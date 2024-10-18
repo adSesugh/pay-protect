@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from django_countries import countries
@@ -15,7 +16,7 @@ from core.serializers import (
     BankSerializer,
     PayoutAccountSerializer, CustomTokenObtainPairSerializer, ProductSerializer, ContractQuestionSerializer,
     DisputeSerializer, DisputeReasonSerializer, ProtectionFeeSerializer, AgreementSerializer, ProductReviewSerializer,
-    FAQsSerializer, CustomTokenVerifySerializer, CustomTokenRefreshSerializer
+    FAQsSerializer, CustomTokenVerifySerializer, CustomTokenRefreshSerializer, DisputeStatusSerializer
 )
 
 import logging
@@ -123,6 +124,8 @@ class DisputeViewSet(viewsets.ModelViewSet):
     queryset = Dispute.objects.all()
     http_method_names = ['get', 'post', 'put']
     parser_classes = (MultiPartParser, FormParser, JSONParser)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
 
     @action(
         detail=False,
@@ -156,15 +159,34 @@ class DisputeViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=["PUT"],
-        url_path='update-reason/(?P<reason_id>[^/.]+)',
+        url_path='update-reason/(?P<dispute_id>[^/.]+)',
         url_name='update-reason',
         serializer_class=DisputeReasonSerializer
     )
-    def update_reason(self, request, pk=None, reason_id=None):
+    def update_reason(self, request, pk=None, dispute_id=None):
         data = request.data
-        reason = DisputeReason.objects.get(pk=reason_id)
+        reason = DisputeReason.objects.get(pk=dispute_id)
         reason.reason = data.get("reason")
         serializer = DisputeReasonSerializer(reason, data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"success": False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=False,
+        methods=["PUT"],
+        url_path='update-status/(?P<dispute_id>[^/.]+)',
+        url_name='update-status',
+        serializer_class=DisputeStatusSerializer
+    )
+    def update_status(self, request, pk=None, dispute_id=None):
+        data = request.data
+        dispute = Dispute.objects.get(pk=dispute_id)
+        dispute.status = data.get("status")
+        serializer = DisputeSerializer(dispute, data=data)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
