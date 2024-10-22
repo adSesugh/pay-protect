@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
@@ -55,10 +56,54 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         return data
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'referral_code',
+            'password',
+            'terms'
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+
+        groups, created = Group.objects.get_or_create(name='User')
+        user.groups.add(groups)
+        user.save()
+
+        return user
+
+
+class UserNotificationSettingsSerializer(serializers.ModelSerializer):
+    notify_on_request = serializers.BooleanField(default=False)
+    notify_on_payment = serializers.BooleanField(default=False)
+    notify_on_milestone = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = User
+        fields = ['notify_on_request', 'notify_on_payment', 'notify_on_milestone']
+
+
+class UserProfilePhotoSerializer(serializers.ModelSerializer):
+    photo_url = serializers.ImageField(required=True)
+
+    class Meta:
+        model = User
+        fields = ['photo_url']
+
+
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', ]
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups']
 
 
 class BankSerializer(serializers.ModelSerializer):
@@ -160,14 +205,29 @@ class DisputeSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
+    product_id = serializers.IntegerField(write_only=True)
+    reason_id = serializers.IntegerField(write_only=True)
     dispute_photos = serializers.SerializerMethodField(read_only=True)
     product = serializers.SerializerMethodField(read_only=True)
     user = UserDataSerializer(read_only=True)
 
     class Meta:
         model = Dispute
-        fields = ['id', 'user', 'product', 'reason', 'description', 'image', 'user', 'dispute_photos', 'status']
+        fields = [
+            'id',
+            'user',
+            'product',
+            'reason',
+            'description',
+            'image',
+            'user',
+            'dispute_photos',
+            'product_id',
+            'reason_id',
+            'status'
+        ]
         depth = 1
+        write_only_fields = ['reason_id', 'product_id']
 
     def get_dispute_photos(self, obj) -> list:
         photos = DisputeImage.objects.filter(dispute=obj)

@@ -5,9 +5,9 @@ from core.utils import CustomUserManager
 
 
 class User(AbstractUser):
+    email = models.EmailField(unique=True)
     terms = models.BooleanField(default=True)
     referral_code = models.CharField(max_length=100, blank=True)
-    referral = models.CharField(max_length=100, blank=True)
     notify_on_request = models.BooleanField(default=False)
     notify_on_payment = models.BooleanField(default=False)
     notify_on_milestone = models.BooleanField(default=False)
@@ -113,8 +113,8 @@ class Dispute(models.Model):
         ('TREATED', 'TREATED'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    reason = models.ForeignKey(DisputeReason, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False, blank=False)
+    reason = models.ForeignKey(DisputeReason, on_delete=models.CASCADE, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
     status = models.CharField(choices=DISPUTE_CHOICES, default='PENDING', max_length=50)
     created_at = models.DateTimeField(auto_now=True)
@@ -151,3 +151,12 @@ class FAQs(models.Model):
     question = models.TextField()
     answer = models.TextField()
     created_at = models.DateTimeField(auto_now=True)
+
+
+# class Transaction(models.Model):
+#     buyer = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+#     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='seller')
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+#     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+#     created_at = models.DateTimeField(auto_now=True)
+#     updated_at = models.DateTimeField(auto_now=True)

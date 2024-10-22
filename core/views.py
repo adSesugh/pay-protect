@@ -10,13 +10,24 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
-from core.models import Bank, PayoutAccount, Product, ContractQuestion, Dispute, DisputeReason, ProtectionFee, FAQs
+from core.models import (
+    Bank,
+    PayoutAccount,
+    Product,
+    ContractQuestion,
+    Dispute,
+    DisputeReason,
+    ProtectionFee,
+    FAQs,
+    User
+)
 from core.serializers import (
     CountrySerializer,
     BankSerializer,
     PayoutAccountSerializer, CustomTokenObtainPairSerializer, ProductSerializer, ContractQuestionSerializer,
     DisputeSerializer, DisputeReasonSerializer, ProtectionFeeSerializer, AgreementSerializer, ProductReviewSerializer,
-    FAQsSerializer, CustomTokenVerifySerializer, CustomTokenRefreshSerializer, DisputeStatusSerializer
+    FAQsSerializer, CustomTokenVerifySerializer, CustomTokenRefreshSerializer, DisputeStatusSerializer, UserSerializer,
+    UserNotificationSettingsSerializer, UserProfilePhotoSerializer
 )
 
 import logging
@@ -58,6 +69,44 @@ class CountryListView(APIView):
             return Response({"success": False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['get', 'post', 'put']
+
+    @action(
+        detail=True,
+        methods=['PUT'],
+        serializer_class=UserNotificationSettingsSerializer,
+    )
+    def notification_settings(self, request, pk=None):
+        data = request.data
+        user = User.objects.get(pk=pk)
+        serializer = UserNotificationSettingsSerializer(user, data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"success": False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=['PUT'],
+        serializer_class=UserProfilePhotoSerializer,
+    )
+    def set_profile_photo(self, request, pk=None):
+        data = request.data
+        user = User.objects.get(pk=pk)
+        serializer = UserProfilePhotoSerializer(user, data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"success": False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class BankViewSet(viewsets.ModelViewSet):
     serializer_class = BankSerializer
     queryset = Bank.objects.all()
@@ -76,7 +125,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     http_method_names = ['get', 'post', 'put']
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @action(
         methods=['get'],
@@ -126,6 +175,7 @@ class DisputeViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status']
+    permission_classes = [IsAuthenticated]
 
     @action(
         detail=False,

@@ -6,8 +6,8 @@ from core.models import Bank, PayoutAccount, Product, ProductImage, ContractQues
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'date_joined', 'last_login', 'referral')
-    list_filter = ('is_staff', 'is_active', 'date_joined', 'last_login', 'referral')
+    list_display = ('username', 'email', 'is_staff', 'is_active', 'date_joined', 'last_login',)
+    list_filter = ('is_staff', 'is_active', 'date_joined', 'last_login',)
 
 
 @admin.register(Bank)
