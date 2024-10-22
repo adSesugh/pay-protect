@@ -5,7 +5,7 @@ from django_countries import countries
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
@@ -74,10 +74,28 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     http_method_names = ['get', 'post', 'put']
 
+    def get_permissions(self):
+        # Set permission for specific actions
+        if self.action == 'list':
+            # Allow only authenticated users to list objects
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            # Allow only admin to retrieve objects
+            permission_classes = [IsAdminUser]
+        elif self.action == 'create':
+            # Allow anyone to create an object
+            permission_classes = [AllowAny]
+        else:
+            # Default permission for other actions
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
     @action(
         detail=True,
         methods=['PUT'],
         serializer_class=UserNotificationSettingsSerializer,
+        permission_classes=[IsAuthenticated],
     )
     def notification_settings(self, request, pk=None):
         data = request.data
@@ -94,6 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=['PUT'],
         serializer_class=UserProfilePhotoSerializer,
+        permission_classes=[IsAuthenticated],
     )
     def set_profile_photo(self, request, pk=None):
         data = request.data

@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import UntypedToken, RefreshToken
 
 from core.models import User, Bank, PayoutAccount, Product, ProductImage, ContractQuestion, DisputeReason, Dispute, \
     ProtectionFee, Agreement, DisputeImage, FAQs
-from core.utils import generate_random_string
+from core.utils import generate_random_string, generate_referral_code
 
 
 class CountrySerializer(serializers.Serializer):
@@ -64,7 +64,6 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
-            'referral_code',
             'password',
             'terms'
         ]
@@ -74,6 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        user.referral_code = generate_referral_code(user.id)
 
         groups, created = Group.objects.get_or_create(name='User')
         user.groups.add(groups)
