@@ -91,6 +91,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name='admin').exists():
+            return User.objects.all()
+        return User.objects.exclude(is_superuser=True).all()
+
     @action(
         detail=True,
         methods=['PUT'],
